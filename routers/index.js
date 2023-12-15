@@ -172,7 +172,7 @@ router.post("/add-user", async (req, res) => {
     }
 })
 
-router.post("/recover-password", async (req, res) => {
+router.post("/recover-password", limiter, async (req, res) => {
     const {email} = req.body;
     try {
         const user = await User.findOne({email});
@@ -203,7 +203,7 @@ router.post("/transactions", createTransaction);
 
 router.get("/transactions", listTransactions)
 
-router.get("/transactions/:id", getTransactionById)
+router.get("/transactions/getById/:id", getTransactionById)
 
 router.get("/transactions/getFive", listTransactionsFive)
 

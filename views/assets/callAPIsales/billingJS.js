@@ -14,10 +14,12 @@ const fetchAPI = async (url, method, body = null) => {
 
 const displayBilling = async () => {
     const transactions = await fetchAPI(get_transactions_salesperson);
+    console.log(transactions);
     displayTransaction(transactions);
     displayTransactionsRight(transactions);
     const fiveTransactions = await fetchAPI(get_tran_five);
     displayInvoices(fiveTransactions);
+    console.log(fiveTransactions);
 }
 
 function displayTransaction(transactions) {
@@ -173,6 +175,7 @@ document.getElementById("view_all").addEventListener("click", async function (e)
     const container = document.getElementById('invoice-list');
     container.innerHTML = "";
     displayInvoices(transactions);
+    console.log(transactions);
 });
 
 document.addEventListener('DOMContentLoaded', (event) => {

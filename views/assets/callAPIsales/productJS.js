@@ -3,7 +3,7 @@ const base_url = "http://localhost:8080";
 const get_all_products = base_url + "/products";
 const add_product = base_url + "/products";
 const create_transaction = base_url + "/transactions";
-const get_tran_byId = base_url + "/transactions";
+const get_tran_byId = base_url + "/transactions/getById";
 
 const fetchAPI = async (url, method, body = null) => {
   const headers = {};

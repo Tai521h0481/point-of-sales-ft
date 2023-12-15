@@ -72,17 +72,28 @@ const displayProducts = async (barcode = "", name = "") => {
                     <p class="product-brand">Quantity: ${product.quantity}</p>
                 </div>
                 <div class="product-actions hidden">
-                    <button class="product-add-to-cart-btn">Add to Cart</button>
+                  <button class="btn btn-danger product-remove-btn" data-product-id="${product._id}">Remove</button>
+                  <button class="btn btn-primary product-update-btn" data-product-id="${product._id}">Update</button>
                 </div>
             `;
         productsContainer.appendChild(productDiv);
       }
     });
-    addEventListenersToCartButtons();
+    addEventListenersToRemoveAndUpdateButtons();
   } catch (error) {
     console.error("Error:", error);
   }
 };
+
+function addEventListenersToRemoveAndUpdateButtons() {
+  document.querySelectorAll('.product-remove-btn').forEach(button => {
+    button.addEventListener('click', () => confirmRemove(button.getAttribute('data-product-id')));
+  });
+
+  document.querySelectorAll('.product-update-btn').forEach(button => {
+    button.addEventListener('click', () => showUpdateForm(button.getAttribute('data-product-id')));
+  });
+}
 
 displayProducts(); // Call the function to display products
 

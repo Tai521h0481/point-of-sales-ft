@@ -2,6 +2,7 @@ const Transaction = require("../models/Transaction");
 const Product = require("../models/Product");
 const Customer = require("../models/Customer");
 const moment = require("moment"); // You might need to install moment.js
+const mongoose = require("mongoose");
 
 exports.getMonthlySoldProducts = async (req, res) => {
   try {
@@ -133,9 +134,10 @@ exports.createTransaction = async (req, res) => {
 exports.getTransaction = async (req, res) => {
   try {
     const transactions = await Transaction.find({
-      salesperson: req.session.user._id,
+      salesperson:req.session.user._id,
     }).populate("products.product customer");
-    if (!transactions) {
+
+    if (transactions.length === 0) {
       return res.status(404).json({ error: "Transaction not found" });
     }
     res.status(200).json(transactions);
