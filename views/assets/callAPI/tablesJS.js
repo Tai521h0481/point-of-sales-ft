@@ -23,9 +23,14 @@ const displayUsers = async () => {
 
     usersData.forEach((user) => {
       // Determine status badge based on user status
-      const statusBadge = user.isActive
+      const statusBadge = user.status === 'online'
         ? "bg-gradient-success"
         : "bg-gradient-secondary";
+      
+      const activeBadge = user.isActive
+        ? "bg-gradient-success"
+        : "bg-gradient-secondary";
+
       const lockBadge = user.isLocked
         ? "bg-gradient-danger"
         : "bg-gradient-success";
@@ -61,7 +66,7 @@ const displayUsers = async () => {
       }</span>
                     </td>
                     <td class="align-middle text-center text-sm">
-                        <span class="badge badge-sm ${statusBadge}">${activeStatus}</span>
+                        <span class="badge badge-sm ${activeBadge}">${activeStatus}</span>
                     </td>
                     <td class="align-middle text-center text-sm">
                         <span class="badge badge-sm ${lockBadge}">${lockStatus}</span>

@@ -2,6 +2,7 @@ const express = require("express");
 const router = express.Router();
 const { rateLimit } = require("express-rate-limit");
 const sendLoginEmail = require("../middlewares/utils/emailService");
+const jwt = require("jsonwebtoken");
 const limiter = rateLimit({
   windowMs: 60 * 1000, // 1 minutes
   limit: 1, // Limit each IP to 100 requests per `window` (here, per 15 minutes).
@@ -18,7 +19,11 @@ const {
   updateUser,
   deleteUser,
 } = require("../controllers/User");
-const {createProduct } = require("../controllers/Product");
+const {createProduct, listProducts, deleteProduct, updateProduct, getProductById } = require("../controllers/Product");
+const {createTransaction, deleteTransaction, getTransaction, 
+  listTransactions, updateTransaction, getTransactionFive, listTransactionsFive,
+  calculateThisMonthsProfit, calculateLast7DaysProfit, calculateTodaysProfit, calculateYesterdaysProfit,
+  getMonthlyImportedProducts, getMonthlySoldProducts, getTransactionById} = require("../controllers/Transaction");
 const User = require("../models/User");
 const Product = require("../models/Product");
 
@@ -105,6 +110,7 @@ router.post("/resend-email/:id", async (req, res) => {
   const id = req.params.id;
   try {
     let user = await User.findById(id);
+    console.log(user);
     const token = jwt.sign({ user }, process.env.JWT_SECRET, {
       expiresIn: "1m",
     });
@@ -123,7 +129,7 @@ router.post("/resend-email/:id", async (req, res) => {
 router.patch("/change-first-password", async (req, res) => {
     const {newPassword} = req.body;
     try{
-        const user = await User.findByIdAndUpdate(req.session.user._id, {password: newPassword}, {new: true});
+        const user = await User.findByIdAndUpdate(req.session.user._id, {password: newPassword, isActive : true}, {new: true});
         req.session.user = user;
         res.status(200).json({message: "successfully"});
     }catch(error){
@@ -185,6 +191,36 @@ router.post("/recover-password", async (req, res) => {
     }
 });
 
-router.post("/products", createProduct);
+router.get("/products", listProducts);
+
+router.get("/products/:id", getProductById);
+
+router.patch("/products/:productId", uploadImg('uploads').single('image'), updateProduct);
+
+router.delete("/products/:productId", deleteProduct);
+
+router.post("/transactions", createTransaction);
+
+router.get("/transactions", listTransactions)
+
+router.get("/transactions/:id", getTransactionById)
+
+router.get("/transactions/getFive", listTransactionsFive)
+
+router.get("/transactions/salesperson", getTransaction)
+
+router.get("/transactions/salesperson/getFive", getTransactionFive)
+
+router.get("/transactions/calculateThisMonthsProfit", calculateThisMonthsProfit)
+
+router.get("/transactions/calculateLast7DaysProfit", calculateLast7DaysProfit)
+
+router.get("/transactions/calculateTodaysProfit", calculateTodaysProfit)
+
+router.get("/transactions/calculateYesterdaysProfit", calculateYesterdaysProfit)
+
+router.get("/transactions/getMonthlyImportedProducts", getMonthlyImportedProducts)
+
+router.get("/transactions/getMonthlySoldProducts", getMonthlySoldProducts)
 
 module.exports = router;

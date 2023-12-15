@@ -34,7 +34,7 @@ exports.loginUser = async (req, res) => {
         user.status = "online";
         await user.save();
         req.session.user = user;
-        res.status(200).json(token);
+        res.status(200).json({user : user.role});
     } catch (error) {
         res.status(400).json(error);
     }

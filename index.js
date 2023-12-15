@@ -5,8 +5,7 @@ const cors = require("cors");
 const session = require("express-session");
 const jwt = require("jsonwebtoken");
 const bodyParser = require("body-parser");
-const multer = require('multer');
-const upload = multer();
+const {uploadImg} = require("./middlewares/utils/uploadImage");
 
 const User = require("./models/User");
 
@@ -24,7 +23,6 @@ app.use(
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 app.use(cors());
-app.use(upload.array());
 const port = process.env.PORT || 8080;
 const staticPathAssets = path.join(__dirname, "views", "assets");
 app.use("/assets", express.static(staticPathAssets));
@@ -38,7 +36,7 @@ app.set("views", path.join(__dirname, "views"));
 app.use(express.json());
 app.use("/", require("./routers"));
 const { MONGO_URL } = process.env;
-
+const {createProduct} = require("./controllers/Product");
 app.listen(port, () => {
     mongoose
         .connect(MONGO_URL)
@@ -63,28 +61,50 @@ app.get("/pages/profile", (req, res) => {
     if (!req.session.user) {
         return res.redirect("/");
     }
-    res.sendFile("pages/profile.html", { root: app.get("views") });
+    if(req.session.user.role === 'admin'){
+        return res.sendFile("pages/profile.html", { root: app.get("views") });
+    }
+    return res.sendFile("salesperson/profile.html", { root: app.get("views") });
 });
 
 app.get("/pages/tables", (req, res) => {
     if (!req.session.user) {
         return res.redirect("/");
     }
-    res.sendFile("pages/tables.html", { root: app.get("views") });
+    if(req.session.user.role === 'admin'){
+        return res.sendFile("pages/tables.html", { root: app.get("views") });
+    }
+    return res.sendFile("salesperson/tables.html", { root: app.get("views") });
 });
 
 app.get("/pages/dashboard", (req, res) => {
     if (!req.session.user) {
         return res.redirect("/");
     }
-    res.sendFile("pages/dashboard.html", { root: app.get("views") });
+    if(req.session.user.role === 'admin'){
+        return res.sendFile("pages/dashboard.html", { root: app.get("views") });
+    }
+    return res.sendFile("salesperson/dashboard.html", { root: app.get("views") });
 });
 
 app.get("/pages/billing", (req, res) => {
     if (!req.session.user) {
         return res.redirect("/");
     }
-    res.sendFile("pages/billing.html", { root: app.get("views") });
+    if(req.session.user.role === 'admin'){
+        return res.sendFile("pages/billing.html", { root: app.get("views") });
+    }
+    return res.sendFile("salesperson/billing.html", { root: app.get("views") });
+});
+
+app.get("/pages/products", (req, res) => {
+    if (!req.session.user) {
+        return res.redirect("/");
+    }
+    if(req.session.user.role === 'admin'){
+        return res.sendFile("pages/product.html", { root: app.get("views") });
+    }
+    return res.sendFile("salesperson/product.html", { root: app.get("views") });
 });
 
 app.get("/login", (req, res) => {
@@ -93,24 +113,22 @@ app.get("/login", (req, res) => {
         try {
             const decoded = jwt.verify(token, process.env.JWT_SECRET);
             if (!decoded) {
-                
+                return res.sendFile("pages/error.html", { root: app.get("views") });
             }
             const user = decoded.user;
             req.session.user = user;
-            res.redirect("/pages/profile");
+            res.sendFile("salesperson/changePassword.html", { root: app.get("views") });
         } catch (error) {
-            res.redirect("/");
+            res.sendFile("pages/error.html", { root: app.get("views") });
         }
     }
-    res.sendFile("pages/index.html", { root: app.get("views") });
 });
 
 app.get("/logout", async (req, res) => {
-    if (!req.session.user) {
-        return res.redirect("/");
-    }
     const user = await User.findById(req.session.user._id);
     user.status = "offline";
     await user.save();
     res.redirect("/");
 });
+
+app.post("/products", uploadImg('uploads').single('image'), createProduct);
